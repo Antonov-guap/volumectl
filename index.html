@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Удалённое управление</title>
+</head>
+<body>
+
+<div id="app" class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <h1>Удалённое управление</h1>
+            <form v-on:submit.prevent>
+                <div class="form-group">
+                    <label for="formControlRange">Настройка громкости</label>
+                    <input
+                            v-model="level" type="range" min="0" max="100"
+                            v-on:change="setVolume"
+                            class="form-control-range" id="formControlRange"
+                    >
+                    <small class="text-muted">
+                        {{level}}%
+                    </small>
+                </div>
+                <div class="form-group">
+                    <button
+                            v-on:click="click"
+                            class="btn btn-primary" id="formControlButton"
+                    >Пауза</button>
+                </div>
+            </form>
+            <img :src="img" alt="screen">
+        </div>
+    </div>
+</div>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- VUE JS -->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+<script>
+
+
+    startFetchVolume = function () {
+        let that = this;
+        let fetchVolume = async function () {
+            let response = await fetch("/volume");
+            that.level = await response.text();
+            console.log(that.level);
+        };
+        fetchVolume();
+        setInterval(fetchVolume, 1000);
+    };
+
+    setVolume = async function () {
+        let response = await fetch('/volume', {
+            method: 'POST',
+            body: this.level,
+        });
+    };
+
+    click = async function () {
+        let resp = await fetch('/click', {
+            method: 'POST',
+        })
+    };
+
+    let app = new Vue({
+        el: '#app',
+        data: {
+            level: 30,
+            img: '',
+        },
+        methods: {
+            setVolume: setVolume,
+            click: click
+        },
+        created: startFetchVolume
+    })
+
+</script>
+</body>
+</html>
